@@ -15,7 +15,11 @@ fn push_merge(v: &mut Vec<(u64, u64)>, range: (u64, u64)) {
 
 #[test]
 fn check_push_merge() {
-    let mut v = vec![(0, 2)];
+    let mut v = vec![];
+
+    push_merge(&mut v, (0, 2));
+
+    assert_eq!(v, [(0, 2)]);
 
     push_merge(&mut v, (4, 5));
 
@@ -46,8 +50,8 @@ fn add_and_merge(v: Vec<(u64, u64)>, range: (u64, u64)) -> Vec<(u64, u64)> {
         ret.extend(&v[..i]);
         push_merge(&mut ret, range);
 
-        for j in i..v.len() {
-            push_merge(&mut ret, v[j]);
+        for &r in v[i..].iter() {
+            push_merge(&mut ret, r);
         }
     } else {
         ret.extend(v);
