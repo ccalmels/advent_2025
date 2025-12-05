@@ -1,0 +1,5 @@
+* Advent Of Code 2025 in Rust
+This year objective is to learn [[https://www.jj-vcs.dev/latest/][jujutsu]]. For this let's use these links as reference:
+- Official documentation: [[https://docs.jj-vcs.dev/v0.36.0/]]
+- [[https://steveklabnik.github.io/jujutsu-tutorial/introduction/introduction.html]]
+- For the github integration: [[https://docs.jj-vcs.dev/v0.36.0/github/]]
