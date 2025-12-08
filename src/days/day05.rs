@@ -1,8 +1,8 @@
 use std::io::{BufRead, Lines};
 
-// This function try to merge range with the last element of the
+// This function tries to merge range with the last element of the
 // vector. The idea here is that the vector is sorted, and range will
-// be add at the end.
+// be added at the end.
 fn push_merge(v: &mut Vec<(u64, u64)>, range: (u64, u64)) {
     if let Some(last) = v.last_mut() {
         if last.1 + 1 >= range.0 {
@@ -15,7 +15,11 @@ fn push_merge(v: &mut Vec<(u64, u64)>, range: (u64, u64)) {
 
 #[test]
 fn check_push_merge() {
-    let mut v = vec![(0, 2)];
+    let mut v = vec![];
+
+    push_merge(&mut v, (0, 2));
+
+    assert_eq!(v, [(0, 2)]);
 
     push_merge(&mut v, (4, 5));
 
@@ -34,7 +38,7 @@ fn check_push_merge() {
     assert_eq!(v, [(0, 2), (4, 8)]);
 }
 
-// This function generate a vector of range by adding and merging a
+// This function generates a vector of range by adding and merging a
 // new range. The vector is sorted so we first try to find where the
 // range must be inserted. When found, let's try to merge with the
 // previous element and then try to merge the remaining ranges.
@@ -46,8 +50,8 @@ fn add_and_merge(v: Vec<(u64, u64)>, range: (u64, u64)) -> Vec<(u64, u64)> {
         ret.extend(&v[..i]);
         push_merge(&mut ret, range);
 
-        for j in i..v.len() {
-            push_merge(&mut ret, v[j]);
+        for &r in v[i..].iter() {
+            push_merge(&mut ret, r);
         }
     } else {
         ret.extend(v);
