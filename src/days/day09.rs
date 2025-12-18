@@ -105,14 +105,11 @@ where
     // finding external angle points
     let mut external_angle_tiles = vec![];
     let mut prev = tiles[tiles.len() - 1].vector(&tiles[0]);
-    let mut rotation = 0;
 
     for i in 0..tiles_len {
         let (a, b) = (&tiles[i], &tiles[(i + 1) % tiles_len]);
         let v = a.vector(b);
         let product = prev.0 * v.1 - prev.1 * v.0;
-
-        rotation += product.signum();
 
         let external_tile = if product > 0 {
             Tile {
@@ -130,10 +127,6 @@ where
 
         prev = v;
     }
-
-    // Check that we're going in CW order. It has some implication on
-    // where to find empty tiles regarding the vector direction.
-    assert_eq!(rotation, 4);
 
     let mut verticals = vec![];
     let mut horizontals = vec![];
