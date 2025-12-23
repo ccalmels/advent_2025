@@ -71,7 +71,7 @@ fn find_combinations(
     if index < buttons.len() {
         let mut ret = find_combinations(buttons, index + 1, leds, objective).unwrap_or_default();
         let mask = buttons[index].mask;
-        let leds = (leds & !mask) | ((leds & mask) ^ mask);
+        let leds = !leds ^ !mask;
 
         if let Some(mut v) = find_combinations(buttons, index + 1, leds, objective) {
             v.iter_mut().for_each(|combi| combi.push(index));
@@ -107,20 +107,54 @@ fn check_find_combinations() {
     );
 }
 
-fn find_combinations_cached(
-    button: &[Button],
+type JoulesLeds = Vec<(usize, Vec<u32>)>;
+
+fn find_joltages_leds_cached(
+    buttons: &[Button],
     objective: u32,
-    cache: &mut HashMap<u32, Option<Combinations>>,
-) -> Option<Combinations> {
+    joules_len: usize,
+    cache: &mut HashMap<u32, JoulesLeds>,
+) -> JoulesLeds {
     if let Some(v) = cache.get(&objective) {
         v.clone()
     } else {
-        let ret = find_combinations(button, 0, 0, objective);
+        let combis = find_combinations(buttons, 0, 0, objective).unwrap_or_default();
+
+        let ret: JoulesLeds = combis
+            .into_iter()
+            .map(|combi| {
+                let mut joules = (combi.len(), vec![0; joules_len]);
+
+                for button in combi {
+                    for &led in &buttons[button].leds {
+                        joules.1[led] += 1;
+                    }
+                }
+
+                joules
+            })
+            .collect();
 
         cache.insert(objective, ret.clone());
 
         ret
     }
+}
+
+#[test]
+fn check_find_joules_leds_cached() {
+    let buttons =
+        ["(3)", "(1,3)", "(2)", "(2,3)", "(0,2)", "(0,1)"].map(|s| Button::from_str(&s).unwrap());
+
+    assert_eq!(
+        find_joltages_leds_cached(&buttons, 0b110, 4, &mut HashMap::new()),
+        vec![
+            (2, vec![2, 1, 1, 0]),
+            (2, vec![0, 1, 1, 2]),
+            (5, vec![2, 1, 3, 2]),
+            (3, vec![0, 1, 1, 2]),
+        ]
+    );
 }
 
 // The part 2 of this day was really hard for me. I tried to
@@ -131,41 +165,32 @@ fn find_combinations_cached(
 fn find_joules(
     buttons: &[Button],
     joules: &[u32],
-    cache: &mut HashMap<u32, Option<Combinations>>,
+    cache: &mut HashMap<u32, JoulesLeds>,
 ) -> Option<usize> {
-    if joules.iter().all(|&j| j == 0) {
+    let (leds, sum) = joules.iter().rev().fold((0, 0), |(leds, sum), joule| {
+        (2 * leds + if joule % 2 == 0 { 0 } else { 1 }, sum + joule)
+    });
+
+    if sum == 0 {
         return Some(0);
     }
 
-    let leds: u32 = joules
-        .iter()
-        .rev()
-        .fold(0, |acc, joule| 2 * acc + if joule % 2 == 0 { 0 } else { 1 });
+    find_joltages_leds_cached(buttons, leds, joules.len(), cache)
+        .into_iter()
+        .filter_map(|(combi_len, joltages)| {
+            let mut j = vec![0; joules.len()];
 
-    find_combinations_cached(buttons, leds, cache).map(|v| {
-        v.into_iter()
-            .filter_map(|combi| {
-                let mut j = Vec::from(joules);
-
-                for &button in &combi {
-                    for &led in &buttons[button].leds {
-                        if j[led] > 0 {
-                            j[led] -= 1;
-                        } else {
-                            return None;
-                        }
-                    }
+            for index in 0..joules.len() {
+                if joules[index] < joltages[index] {
+                    return None;
+                } else {
+                    j[index] = (joules[index] - joltages[index]) / 2;
                 }
+            }
 
-                for joule in &mut j {
-                    assert_eq!(*joule % 2, 0);
-                    *joule /= 2;
-                }
-
-                find_joules(buttons, &j, cache).map(|m| combi.len() + 2 * m)
-            })
-            .min()
-    })?
+            find_joules(buttons, &j, cache).map(|m| combi_len + 2 * m)
+        })
+        .min()
 }
 
 #[test]
@@ -222,10 +247,10 @@ where
             || (0, 0),
             |(p1, p2), (leds, buttons, joltages)| {
                 let mut cache = HashMap::new();
-                let combis = find_combinations_cached(&buttons, leds, &mut cache).unwrap();
+                let combis = find_joltages_leds_cached(&buttons, leds, joltages.len(), &mut cache);
 
                 (
-                    p1 + combis.iter().map(|v| v.len()).min().unwrap(),
+                    p1 + combis.iter().map(|&(len, _)| len).min().unwrap(),
                     p2 + find_joules(&buttons, &joltages, &mut cache).unwrap(),
                 )
             },
