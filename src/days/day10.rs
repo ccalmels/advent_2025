@@ -250,8 +250,8 @@ where
                 let combis = find_joltages_leds_cached(&buttons, leds, joltages.len(), &mut cache);
 
                 (
-                    p1 + combis.iter().map(|&(len, _)| len).min().unwrap(),
-                    p2 + find_joules(&buttons, &joltages, &mut cache).unwrap(),
+                    p1 + combis.iter().map(|&(len, _)| len).min().unwrap_or_default(),
+                    p2 + find_joules(&buttons, &joltages, &mut cache).unwrap_or_default(),
                 )
             },
         )

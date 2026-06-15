@@ -27,6 +27,8 @@ fn find_joltage(bank: &[u8], batteries_number: usize) -> u64 {
     let mut number = 0;
     let mut start_index = 0;
 
+    assert!(batteries_number <= bank.len());
+
     for k in (0..batteries_number).rev() {
         let value = find_max(&bank[start_index..bank.len() - k]);
 
