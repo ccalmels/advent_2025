@@ -104,6 +104,7 @@ where
 
     for range in line.split(',') {
         let rs = range.split('-').collect::<Vec<_>>();
+        assert_eq!(rs.len(), 2);
         let (min, max) = (rs[0].as_bytes(), rs[1].as_bytes());
 
         // 7 is the max prime number that can split the range values.

@@ -113,6 +113,7 @@ where
 
         if is_range {
             let rs: Vec<u64> = line.split('-').map(|x| x.parse::<u64>().unwrap()).collect();
+            assert_eq!(rs.len(), 2);
             let (first, last) = (rs[0], rs[1]);
 
             ranges = add_and_merge(ranges, (first, last));
