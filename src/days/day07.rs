@@ -27,7 +27,7 @@ where
                 if index > 0 && line[index - 1] != b'^' {
                     tmp[index - 1] += paths;
                 }
-                if index < SIZE && line[index + 1] != b'^' {
+                if index < SIZE - 1 && line[index + 1] != b'^' {
                     tmp[index + 1] += paths;
                 }
                 p1 += 1;
