@@ -15,6 +15,8 @@ where
         let line = line.unwrap();
         let line = line.as_bytes();
 
+        assert!(line.len() == SIZE);
+
         // Start position
         let mut tmp = vec![0usize; SIZE];
 
