@@ -147,7 +147,10 @@ fn read_lines(
             "https://adventofcode.com/2025/day/{day_number}/input"
         ))?;
 
-        handle.write_function(move |data| Ok(file.write(data).unwrap()))?;
+        handle.write_function(move |data| {
+            file.write_all(data).unwrap();
+            Ok(data.len())
+        })?;
         handle.perform()?;
     }
 
