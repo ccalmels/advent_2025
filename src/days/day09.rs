@@ -59,23 +59,20 @@ fn is_segments_intersect(
     // If there are several matches we can match any of them. Not the
     // first not the last. So to avoid missing some elements, we will
     // try to find v0 - 1. When found, we know that if we start
-    // looping at found + 1 in the slice we will be able to find the
-    // first to be >= v0 in the Ok path in the match part.
+    // looping at found + 1 will finaly get the v0 ones thanks to the
+    // continue in the loop.
     let start = segments.binary_search_by_key(&(v0 - 1), |&(v, _)| v);
     let start = match start {
-        Ok(i) => {
-            segments[i + 1..]
-                .iter()
-                .position(|&(v, _)| v >= v0)
-                .unwrap_or_default()
-                + i
-                + 1
-        }
+        Ok(i) => i + 1,
         Err(i) => i,
     };
 
     for &segment in segments.iter().skip(start) {
         let (v, (a, b)) = segment;
+
+        if v < v0 {
+            continue;
+        }
 
         if v > v1 {
             break;
