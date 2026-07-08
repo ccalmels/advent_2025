@@ -22,6 +22,8 @@ where
 
     let mut end = WIDTH;
 
+    assert!(operations.len() <= WIDTH);
+
     while let Some(index) = operations[..end].iter().rposition(|&c| c != b' ') {
         let p1_numbers = worksheet[0..LINES - 1].iter().map(|line| {
             line[index..end]
